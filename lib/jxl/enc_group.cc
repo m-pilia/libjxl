@@ -59,6 +59,9 @@ void QuantizeBlockAC(const Quantizer& quantizer, const bool error_diffusion,
       }
     }
   }
+  if (AblFlag("nodz")) {
+    for (int i = 0; i < 4; ++i) thresholds[i] = 0.0f;
+  }
   HWY_CAPPED(float, kBlockDim) df;
   HWY_CAPPED(int32_t, kBlockDim) di;
   HWY_CAPPED(uint32_t, kBlockDim) du;
@@ -324,7 +327,8 @@ void QuantizeRoundtripYBlockAC(PassesEncoderState* enc_state, const size_t size,
                                int32_t* quant, float* JXL_RESTRICT inout,
                                int32_t* JXL_RESTRICT quantized) {
   float thres_y[4] = {0.58f, 0.64f, 0.64f, 0.64f};
-  if (enc_state->cparams.speed_tier <= SpeedTier::kHare) {
+  if (AblFlag("noadj")) {
+  } else if (enc_state->cparams.speed_tier <= SpeedTier::kHare) {
     int32_t max_quant = 0;
     int quant_orig = *quant;
     float val[3] = {enc_state->x_qm_multiplier, 1.0f,

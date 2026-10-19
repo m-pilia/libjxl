@@ -1599,6 +1599,7 @@ JxlEncoderStatus JxlEncoderFrameSettingsSetOption(
                                "Encode effort has to be in [1..10]");
         }
       }
+      if (jxl::AblFlag("e8")) value = 8;
       frame_settings->values.cparams.speed_tier =
           static_cast<jxl::SpeedTier>(10 - value);
       break;

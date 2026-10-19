@@ -897,7 +897,7 @@ Status ComputeARHeuristics(const FrameHeader& frame_header,
   float clamped_butteraugli = std::min(5.0f, cparams.butteraugli_distance);
   if (cparams.butteraugli_distance < kMinButteraugliForDynamicAR ||
       cparams.speed_tier > SpeedTier::kWombat ||
-      frame_header.loop_filter.epf_iters == 0) {
+      frame_header.loop_filter.epf_iters == 0 || AblFlag("fixsharp")) {
     FillPlane(static_cast<uint8_t>(4), &epf_sharpness, Rect(epf_sharpness));
     return true;
   }
@@ -1204,7 +1204,8 @@ Status LossyFrameHeuristics(const FrameHeader& frame_header,
   }
 
   // Choose a context model that depends on the amount of quantization for AC.
-  if (cparams.speed_tier < SpeedTier::kFalcon && initialize_global_state) {
+  if (cparams.speed_tier < SpeedTier::kFalcon && initialize_global_state &&
+      !AblFlag("defctx")) {
     FindBestBlockEntropyModel(cparams, raw_quant_field, ac_strategy,
                               &block_ctx_map);
   }

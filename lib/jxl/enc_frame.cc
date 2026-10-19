@@ -1095,6 +1095,7 @@ Status ComputeAllCoeffOrders(PassesEncoderState& enc_state,
   auto used_orders_info = ComputeUsedOrders(
       enc_state.cparams.speed_tier, enc_state.shared.ac_strategy,
       Rect(enc_state.shared.raw_quant_field));
+  if (AblFlag("natorder")) used_orders_info.second = 0;
   enc_state.used_orders.resize(enc_state.progressive_splitter.GetNumPasses());
   for (size_t i = 0; i < enc_state.progressive_splitter.GetNumPasses(); i++) {
     JXL_RETURN_IF_ERROR(ComputeCoeffOrder(
@@ -1213,6 +1214,9 @@ Status EncodeGlobalACInfo(PassesEncoderState* enc_state, BitWriter* writer,
                                 shared.block_ctx_map.NumACContexts());
     if (enc_state->cparams.speed_tier > SpeedTier::kTortoise) {
       hist_params.lz77_method = HistogramParams::LZ77Method::kNone;
+    }
+    if (AblFlag("aclz77")) {
+      hist_params.lz77_method = HistogramParams::LZ77Method::kRLE;
     }
     if (enc_state->cparams.decoding_speed_tier >= 1) {
       hist_params.max_histograms = 6;
@@ -2347,6 +2351,8 @@ Status EncodeFrame(JxlMemoryManager* memory_manager,
                    JxlEncoderOutputProcessorWrapper* output_processor,
                    AuxOut* aux_out) {
   CompressParams cparams = cparams_orig;
+  if (AblFlag("nogab")) cparams.gaborish = Override::kOff;
+  if (AblFlag("noepf")) cparams.epf = 0;
   if (cparams.speed_tier == SpeedTier::kTectonicPlate &&
       !cparams.IsLossless()) {
     cparams.speed_tier = SpeedTier::kGlacier;

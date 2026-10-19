@@ -1571,10 +1571,15 @@ Status EncodeHistograms(const std::vector<uint8_t>& context_map,
 }
 
 StatusOr<size_t> BuildAndEncodeHistograms(
-    JxlMemoryManager* memory_manager, const HistogramParams& params,
+    JxlMemoryManager* memory_manager, const HistogramParams& params_in,
     size_t num_contexts, std::vector<std::vector<Token>>& tokens,
     EntropyEncodingData* codes, std::vector<uint8_t>* context_map,
     BitWriter* writer, LayerType layer, AuxOut* aux_out) {
+  HistogramParams params = params_in;
+  if (AblFlag("huff")) params.force_huffman = true;
+  if (AblFlag("nolz77")) params.lz77_method = HistogramParams::LZ77Method::kNone;
+  if (AblFlag("kbest")) params.clustering = HistogramParams::ClusteringType::kBest;
+  if (AblFlag("kfastest")) params.clustering = HistogramParams::ClusteringType::kFastest;
   size_t cost = 0;
   codes->lz77.nonserialized_distance_context = num_contexts;
   std::vector<std::vector<Token>> tokens_lz77;

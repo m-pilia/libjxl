@@ -363,6 +363,10 @@ Status EstimateEntropy(const AcStrategy& acs, float entropy_mul, size_t x,
                        const float* JXL_RESTRICT cmap_factors, float* block,
                        float* full_scratch_space, uint32_t* quantized,
                        float& entropy) {
+  if (!AblAcsAllowed(static_cast<uint32_t>(acs.Strategy()))) {
+    entropy = 1e30f;
+    return true;
+  }
   entropy = 0.0f;
   float* mem = full_scratch_space;
   float* scratch_space = full_scratch_space + AcStrategy::kMaxCoeffArea;

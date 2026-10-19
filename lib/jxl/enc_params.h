@@ -11,6 +11,9 @@
 #include <jxl/cms_interface.h>
 #include <jxl/encode.h>
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
 #include <vector>
 
@@ -24,6 +27,26 @@
 #include "lib/jxl/splines.h"
 
 namespace jxl {
+
+inline bool AblFlag(const char* name) {
+  const char* env = getenv("JXL_ABL");
+  if (env == nullptr) return false;
+  const size_t n = strlen(name);
+  for (const char* p = env; *p != 0;) {
+    const char* end = strchr(p, ',');
+    const size_t len = end != nullptr ? static_cast<size_t>(end - p) : strlen(p);
+    if (len == n && strncmp(p, name, n) == 0) return true;
+    if (end == nullptr) break;
+    p = end + 1;
+  }
+  return false;
+}
+
+inline bool AblAcsAllowed(uint32_t raw_strategy) {
+  const char* env = getenv("JXL_ABL_ACS");
+  if (env == nullptr || *env == 0) return true;
+  return ((strtoul(env, nullptr, 0) >> raw_strategy) & 1) != 0;
+}
 
 // NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
 struct CompressParams {

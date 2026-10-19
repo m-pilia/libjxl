@@ -120,7 +120,7 @@ int32_t FindBestMultiplier(const float* values_m, const float* values_s,
     return 0;
   }
   float x;
-  if (fast) {
+  if (fast || AblFlag("cflfast")) {
     static constexpr float kInvColorFactor = 1.0f / kDefaultColorFactor;
     auto ca = Zero(df);
     auto cb = Zero(df);
